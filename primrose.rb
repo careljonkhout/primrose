@@ -51,8 +51,12 @@ class Primrose
 
   def to_s; 'Primrose' end
 
+  def is_a_special_case?
+    (0..6).all? { |i| ( @field[@previous[1]][i] != :empty ) and ( @field[i][@previous[0]] != :empty ) }
+  end
+
   def move x, y
-    if @field[y][x] == :empty && ( @next_next || @previous[0] == x || @previous[1] == y )
+    if @field[y][x] == :empty && ( @next_next || @previous[0] == x || @previous[1] == y || is_a_special_case? )
       @previous = [x,y] if @next_next
       # sco: square clicked on
       sco = @field[y][x]
@@ -125,10 +129,8 @@ class Primrose
     if @next_next
       @next, @next_next = @next_next, nil
     else # if @next_next == nil
-      #@next, @next_next = @colors[rand @colors.length], @colors[rand @colors.length]
-      @next, @next_next = @colors[@i], @colors[@i]
-      @i = @i + 1
-      @i = @i % 3
+      @next, @next_next = @colors[rand @colors.length], @colors[rand @colors.length]
+#      @next, @next_next = @colors[@i], @colors[@i]; @i = @i + 1; @i = @i % 3
     end
   end
 

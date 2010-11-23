@@ -2,6 +2,8 @@ Clone of a fun little game.
 
 Google or search your linux distro's repository for "primrose" to find the original.
 This clone is currently the same or worse in every way.
+The upside is that this version is written in ruby and is easier to hack than the original version,
+which is written in C++.
 
 This version depends on rubygame. To install see:
 
