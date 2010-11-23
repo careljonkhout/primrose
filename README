@@ -1,0 +1,18 @@
+Clone of a fun little game.
+
+Google or search your linux distro's repository for "primrose" to find the original.
+This clone is currently the same or worse in every way.
+
+This version depends on rubygame. To install see:
+
+http://rubygame.org/wiki/Installation_Instructions
+
+On mac you need to do:
+
+gem install rsdl
+
+rsdl primrose_main.rb
+
+for it to work.
+
+
