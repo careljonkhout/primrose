@@ -15,6 +15,7 @@ class PrimroseMain
     @clock = Rubygame::Clock.new
     @clock.target_framerate = 30
     @primrose = Primrose.new
+    @numerals = Rubygame::Surface.load 'numeralsBig.tga'
     draw_borders
   end
  
@@ -25,7 +26,7 @@ class PrimroseMain
       @clock.tick
       if @wait_time
         unless @wait_time == 0
-          @wait_time = @wait_time - 1
+          @wait_time -= 1
         else
           update_screen_and_handle_secondary_effects
         end

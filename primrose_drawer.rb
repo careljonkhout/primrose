@@ -31,7 +31,17 @@ module PrimroseDrawer
       [PADDING + 4*STRIDE          - 1, 2 * PADDING +   BORDER + 9*STRIDE - 1],
       Rubygame::Color[if @primrose.next_next then @primrose.next_next else :black end]
     )
+    draw_score
     @screen.flip
+  end
+
+  def draw_score
+    @screen.draw_box_s [0,0], [200,40], [0,0,0]
+    score = @primrose.score
+    10.times do |i|
+      score, digit = score.divmod 10
+      @numerals.blit @screen, [180-20*i,0], [6,40*digit,20,40]
+    end      
   end
 
   STOP = 7*SIDE+8*BORDER+PADDING-1

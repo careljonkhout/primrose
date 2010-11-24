@@ -17,13 +17,12 @@ class Square
   end
 
   def to_s; "[#{row}, #{column}] " end
-
-  def == content; @content == content end
 end
 
 class Primrose
-  attr_accessor :field, :next, :next_next, :secondary_effects
+  attr_accessor :field, :next, :next_next, :secondary_effects, :score
   def initialize
+    @score = 0
     @i = 0 # for debugging
     @colors = [:purple, :green, :orange]
     update_colors
@@ -49,43 +48,44 @@ class Primrose
 
   end
 
-  def to_s; 'Primrose' end
-
   def is_a_special_case?
     (0..6).all? { |i| ( @field[@previous[1]][i] != :empty ) and ( @field[i][@previous[0]] != :empty ) }
   end
 
   def move x, y
-    if @field[y][x] == :empty && ( @next_next || @previous[0] == x || @previous[1] == y || is_a_special_case? )
+    if @field[y][x].content == :empty && ( @next_next || @previous[0] == x || @previous[1] == y || is_a_special_case? )
       @previous = [x,y] if @next_next
-      # sco: square clicked on
-      sco = @field[y][x]
-      sco.content = @next
-      # ssosco's: surrounding square of square clicked on; includes sco
-      @borders = []; @group_squares = []
-      sco.surrounding_squares.push(sco).each do |ssosco|
-        puts "Square: #{ssosco}"
-        evaluate_square ssosco   
-      end # of s.surrounding_squares.push(s).each do |s|
+      clicked_on = @field[y][x]
+      clicked_on.content = @next
+      @borders = []; @groups = []
+      clicked_on.surrounding_squares.push(clicked_on).each do |square|
+        puts "Square: #{square}"
+        evaluate_square square
+      end
       update_field
+      update_score
       update_colors
-    end # of if @field[y][x] == :empty
+    end
   end
 
   def calculate_secondary_effects
-    @borders, @group_squares = [], []
-    @field.each do |row| row.each do |square|
-      evaluate_square square
-    end; end
-    @secondary_effects = ( @borders != [] )
+    @borders, @groups = [], []
+    @field.each { |row| row.each { |square| evaluate_square square } }
     update_field
+    update_score
+    @secondary_effects = ( @borders != [] )
   end
 
   def update_field
-    @borders.each do |border|
-      border[:squares].each { |s| s.content = border[:new_color] }
+    @borders.each { |border| border[:squares].each { |s| s.content = border[:new_color] } }
+    @groups.each { |g| g.each { |s| s.content = :empty } } # this must happen after borders.each { ... }
+  end
+
+  def update_score
+    @groups.uniq!
+    @groups.each do |group|
+      @score += group.count
     end
-    @group_squares.each { |s| s.content = :empty } # this must happen after borders.each do ... end
   end
 
   def evaluate_square square
@@ -94,29 +94,24 @@ class Primrose
       group, border = [], []
       while stack != []
         puts "Stack: #{stack}"
-        # sotos: square on top of stack
-        sotos = stack.pop
-        group << sotos
-        # ssosotos: surrounding squares of square on top of stack
-        sotos.surrounding_squares do |ssosotos|
-          if ssosotos.content == sotos.content
-            stack << ssosotos unless group.include? ssosotos
-          else border << ssosotos end
+        top_of_stack = stack.pop
+        group << top_of_stack
+        top_of_stack.surrounding_squares do |surrounding|
+          if surrounding.content == top_of_stack.content
+            stack << surrounding unless group.include? surrounding
+          else border << surrounding end
         end
       end
       border.uniq!
-      content_of_border = nil
-      content_of_border = border.first.content if border.first
-      surrounded = 
-        content_of_border != :empty &&
-        content_of_border != square.content &&
-        ( border.all? { |s| s.content == content_of_border } )
+      content_of_border = if border.first then border.first.content else nil end
+      surrounded = content_of_border != :empty &&
+                   ( border.all? { |s| s.content == content_of_border } )
       puts "Group:  #{group}"
       puts "Border: #{border}"
       puts surrounded
       if surrounded
         @borders << { :squares => border, :new_color => square.content }
-        @group_squares = @group_squares + group
+        @groups << group
       end
     end
   end
