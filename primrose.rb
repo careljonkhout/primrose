@@ -56,6 +56,7 @@ class Primrose
   def move x, y
     if @field[y][x].content == :empty && ( @next_next || @previous[0] == x || @previous[1] == y || is_a_special_case? )
       push_field
+      @iteration = 1
       @previous = [x,y] if @next_next
       clicked_on = @field[y][x]
       clicked_on.content = @next
@@ -87,6 +88,7 @@ class Primrose
   end
 
   def calculate_secondary_effects
+    @iteration += 1
     @borders, @groups = [], []
     @field.each { |row| row.each { |square| evaluate_square square } }
     update_field
@@ -102,7 +104,9 @@ class Primrose
   def update_score
     @groups.uniq!
     @groups.each do |group|
-      @score += group.count * 10
+      size = group.count
+      group_score_factor = (if size < 11 then 10 * size ** 0.5 else size + 21 end).round
+      @score += group_score_factor * @iteration ** 4
     end
   end
 
