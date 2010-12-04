@@ -5,6 +5,21 @@ This clone is currently the same or worse in every way.
 The upside is that this version is written in ruby and is easier to hack than the original version,
 which is written in C++.
 
+These features are NOT implemented:
+
+- sound
+- colors beyond green, purple and orange
+- available colors bar
+- available color addition / removal + countdowns
+- points are visible when they are earned
+- points per square increase as game progresses
+- points per square increase with size of group
+- points per square increase with secondary explosions
+- networking
+- menu
+- help
+
+
 This version depends on rubygame. To install see:
 
 http://rubygame.org/wiki/Installation_Instructions

@@ -54,6 +54,10 @@ class PrimroseMain
           puts "clicked on: #{x}, #{y}"
           @primrose.move x, y
           update_screen_and_handle_secondary_effects
+        elsif ( x == 7 ) && ( y == -1 )
+          puts 'undo'
+          @primrose.undo
+          update_screen
         end
       end
     end

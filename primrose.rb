@@ -22,6 +22,7 @@ end
 class Primrose
   attr_accessor :field, :next, :next_next, :secondary_effects, :score
   def initialize
+    @undo_stack = []
     @score = 0
     @i = 0 # for debugging
     @colors = [:purple, :green, :orange]
@@ -54,6 +55,7 @@ class Primrose
 
   def move x, y
     if @field[y][x].content == :empty && ( @next_next || @previous[0] == x || @previous[1] == y || is_a_special_case? )
+      push_field
       @previous = [x,y] if @next_next
       clicked_on = @field[y][x]
       clicked_on.content = @next
@@ -66,6 +68,22 @@ class Primrose
       update_score
       update_colors
     end
+  end
+
+  def push_field
+    squares = []
+    @field.each do |row| row.each do |square|
+      squares << square.content
+    end; end
+    @undo_stack << squares
+    puts @undo_stack
+  end
+
+  def undo
+    squares = @undo_stack.pop; i = 0
+    @field.each do |row| row.each do |square|
+      square.content = squares[i]; i += 1
+    end; end
   end
 
   def calculate_secondary_effects
@@ -84,7 +102,7 @@ class Primrose
   def update_score
     @groups.uniq!
     @groups.each do |group|
-      @score += group.count
+      @score += group.count * 10
     end
   end
 
@@ -130,3 +148,4 @@ class Primrose
   end
 
 end
+
