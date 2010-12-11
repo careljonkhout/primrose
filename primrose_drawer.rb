@@ -1,5 +1,5 @@
 module Dimensions
-  SIDE = 48
+  SIDE = 40
   PADDING = 48
   BORDER = 4
 end
@@ -38,6 +38,23 @@ module PrimroseDrawer
       [PADDING + 4*STRIDE          - 1, 2 * PADDING +   BORDER + 9*STRIDE - 1],
       Rubygame::Color[map_empties_to_dark_gray @primrose.next_next]
     )
+    7.times do |i|
+      s.draw_box_s( 
+        [PADDING + i    *STRIDE + BORDER    , 3 * PADDING + 3*BORDER +  9*STRIDE    ],
+        [PADDING + (i+1)*STRIDE          - 1, 3 * PADDING + 2*BORDER + 10*STRIDE - 1],
+        Rubygame::Color[map_empties_to_dark_gray @primrose.color_collection[i]]
+      )
+    end
+    if @hover
+      x, y = @hover
+      if @primrose.field[y][x].content == :empty
+        s.draw_box_s(
+          [ start  + x * stride, start  + y * stride ],
+          [ finish + x * stride, finish + y * stride ],
+          Rubygame::Color[@primrose.next]
+        )
+      end
+    end
     draw_score
     @screen.flip
   end

@@ -8,7 +8,7 @@ class PrimroseMain
   include PrimroseDrawer
 
   def initialize
-    @screen = Rubygame::Screen.new [7*SIDE+8*BORDER+2*PADDING,9*SIDE+11*BORDER+3*PADDING], 0, [Rubygame::SWSURFACE]
+    @screen = Rubygame::Screen.new [7*SIDE+8*BORDER+2*PADDING,10*SIDE+13*BORDER+4*PADDING], 0, [Rubygame::SWSURFACE]
     @screen.title = "Primrose"
     (@queue = Rubygame::EventQueue.new).enable_new_style_events
     @clock = Rubygame::Clock.new
@@ -18,7 +18,6 @@ class PrimroseMain
     Rubygame::Color[:orange] = Rubygame::Color::ColorRGB.new_from_sdl_rgba([254,112,0  ,255])
     Rubygame::Color[:green ] = Rubygame::Color::ColorRGB.new_from_sdl_rgba([127,254,0  ,255])
     Rubygame::Color[:purple] = Rubygame::Color::ColorRGB.new_from_sdl_rgba([95, 0  ,190,255])
-    draw_borders
   end
  
   def run
@@ -39,28 +38,45 @@ class PrimroseMain
   def update
     @queue.each do |ev|
       case ev
-      when Rubygame::Events::QuitRequested
-        Rubygame.quit
-        exit
+        when Rubygame::Events::QuitRequested
+          Rubygame.quit
+          exit
       
-      when Rubygame::Events::MousePressed
-        pos = []
-        ev.pos.each_with_index do |coor,i|
-          coor   = coor - ( PADDING + BORDER )
-          pos[i] = coor / ( SIDE    + BORDER )
-        end
-        x = pos[0]; y = pos[1]
-        if ( x >= 0 ) && ( y >= 0 ) && ( x <= 6 ) && ( y <= 6 ) && !@locked
-          puts "clicked on: #{x}, #{y}"
-          if @primrose.move x, y
-            update_screen
-            handle_2nd_phase
+        when Rubygame::Events::MousePressed
+          pos = []
+          ev.pos.each_with_index do |coor,i|
+            coor   = coor - ( PADDING + BORDER )
+            pos[i] = coor / ( SIDE    + BORDER )
           end
-        elsif ( x == 7 ) && ( y == -1 )
-          puts 'undo'
-          @primrose.undo
-          update_screen
-        end
+          x = pos[0]; y = pos[1]
+          if !@locked
+            if ( x >= 0 ) && ( y >= 0 ) && ( x <= 6 ) && ( y <= 6 )
+              puts "clicked on: #{x}, #{y}"
+              if @primrose.move x, y
+                update_screen
+                handle_2nd_phase
+              end
+            elsif ( x == 7 ) && ( y == -1 )
+              puts 'undo'
+              @primrose.undo
+              update_screen
+            end
+          end
+        when Rubygame::Events::MouseMoved
+          pos = []
+          ev.pos.each_with_index do |coor,i|
+            coor   = coor - ( PADDING + BORDER )
+            pos[i] = coor / ( SIDE    + BORDER )
+          end
+          x = pos[0]; y = pos[1]
+          if !@locked
+            if ( x >= 0 ) && ( y >= 0 ) && ( x <= 6 ) && ( y <= 6 )
+              @hover = pos
+            else
+              @hover = nil
+            end
+            update_screen
+          end
       end
     end
   end
