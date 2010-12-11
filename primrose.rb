@@ -20,12 +20,13 @@ class Square
 end
 
 class Primrose
-  attr_accessor :field, :next, :next_next, :secondary_effects, :score
+  attr_accessor :field, :next, :next_next, :secondary_effects, :score, :second_phase_to_be_copied_onto_field
   def initialize
+    @move_counter = 0
     @undo_stack = []
     @score = 0
     @i = 0 # for debugging
-    @colors = [:purple, :green, :orange]
+    @color_collection = [:purple, :green, :orange]
     update_colors
     f = @field = []
 
@@ -54,7 +55,8 @@ class Primrose
   end
 
   def move x, y
-    if @field[y][x].content == :empty && ( @next_next || @previous[0] == x || @previous[1] == y || is_a_special_case? )
+    if @field[y][x].content == :empty &&
+        ( @next_next || @previous[0] == x || @previous[1] == y || is_a_special_case? )
       push_field
       @iteration = 1
       @previous = [x,y] if @next_next
@@ -65,10 +67,25 @@ class Primrose
         puts "Square: #{square}"
         evaluate_square square
       end
-      update_field
-      update_score
       update_colors
+      manage_color_collection
+      @second_phase_to_be_copied_onto_field = ( @borders != [] )
+      return true
+    else
+      return false
     end
+  end
+  
+  def copy_second_phase_onto_field_and_update_score
+    update_field
+    update_score
+  end
+  
+  def manage_color_collection
+    @move_counter += 1
+    if @move_counter == 96
+      @color_collection << :red
+    end  
   end
 
   def push_field
@@ -145,11 +162,17 @@ class Primrose
   def update_colors
     if @next_next
       @next, @next_next = @next_next, nil
-    else # if @next_next == nil
-      @next, @next_next = @colors[rand @colors.length], @colors[rand @colors.length]
-#      @next, @next_next = @colors[@i], @colors[@i]; @i = @i + 1; @i = @i % 3
+    else # if @next_next.nil?
+      @next, @next_next = @color_collection.random, @color_collection.random
+#      @next, @next_next = @colors[@i], @colors[@i]; @i += 1; @i %= 3
     end
   end
 
+end
+
+class Array
+  def random
+    self[rand length]
+  end
 end
 

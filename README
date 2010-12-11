@@ -12,12 +12,14 @@ Some of the features implemented:
 
 These features are NOT implemented:
 
+- indication of where the second square of a pair can be placed in the form of a +.
 - sound
 - colors beyond green, purple and orange
 - available colors bar
 - available color addition / removal + countdowns
 - points are visible in squares when they are earned
 - points per square increase as game progresses
+- smooth transition animation
 - networking
 - menu
 - help

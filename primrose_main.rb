@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'rubygame'
-require 'primrose'
-require 'primrose_drawer'
+require "#{File.dirname(__FILE__)}/primrose"
+require "#{File.dirname(__FILE__)}/primrose_drawer"
 
 class PrimroseMain
   include Dimensions     # SIDE, PADDING and BORDER
@@ -10,12 +10,14 @@ class PrimroseMain
   def initialize
     @screen = Rubygame::Screen.new [7*SIDE+8*BORDER+2*PADDING,9*SIDE+11*BORDER+3*PADDING], 0, [Rubygame::SWSURFACE]
     @screen.title = "Primrose"
-    @queue = Rubygame::EventQueue.new
-    @queue.enable_new_style_events
+    (@queue = Rubygame::EventQueue.new).enable_new_style_events
     @clock = Rubygame::Clock.new
     @clock.target_framerate = 30
     @primrose = Primrose.new
-    @numerals = Rubygame::Surface.load 'numeralsBig.tga'
+    @numerals = Rubygame::Surface.load "#{File.dirname(__FILE__)}/numeralsBig.tga"
+    Rubygame::Color[:orange] = Rubygame::Color::ColorRGB.new_from_sdl_rgba([254,112,0  ,255])
+    Rubygame::Color[:green ] = Rubygame::Color::ColorRGB.new_from_sdl_rgba([127,254,0  ,255])
+    Rubygame::Color[:purple] = Rubygame::Color::ColorRGB.new_from_sdl_rgba([95, 0  ,190,255])
     draw_borders
   end
  
@@ -24,9 +26,9 @@ class PrimroseMain
     loop do
       update
       @clock.tick
-      if @wait_time
-        unless @wait_time == 0
-          @wait_time -= 1
+      if @wait
+        unless @wait == 0
+          @wait -= 1
         else
           update_screen_and_handle_secondary_effects
         end
@@ -48,12 +50,12 @@ class PrimroseMain
           pos[i] = coor / ( SIDE    + BORDER )
         end
         x = pos[0]; y = pos[1]
-
-        puts @locked
         if ( x >= 0 ) && ( y >= 0 ) && ( x <= 6 ) && ( y <= 6 ) && !@locked
           puts "clicked on: #{x}, #{y}"
-          @primrose.move x, y
-          update_screen_and_handle_secondary_effects
+          if @primrose.move x, y
+            update_screen
+            handle_2nd_phase
+          end
         elsif ( x == 7 ) && ( y == -1 )
           puts 'undo'
           @primrose.undo
@@ -63,15 +65,24 @@ class PrimroseMain
     end
   end
  
+  def handle_2nd_phase
+    if @primrose.second_phase_to_be_copied_onto_field
+      @locked = true
+      @wait = 15
+      @primrose.copy_second_phase_onto_field_and_update_score
+      @primrose.second_phase_to_be_copied_onto_field = false
+    end
+  end
+
   def update_screen_and_handle_secondary_effects
     update_screen
     @primrose.calculate_secondary_effects
     if @primrose.secondary_effects
       @locked = true
-      @wait_time = 15
+      @wait = 15
     else
       @locked = false
-      @wait_time = nil
+      @wait = nil
     end
   end
 
