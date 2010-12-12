@@ -1,21 +1,19 @@
 Clone of a fun little game.
 
 Google or search your linux distro's repository for "primrose" to find the original.
-This clone is currently the same or worse in every way.
-The upside is that this version is written in ruby and is easier to hack than the original version,
-which is written in C++.
+This version is written in ruby. It has a undo feature. You can undo moves by clicking on the top right area of the game window.
 
 Some of the features implemented:
 
 - points per square increase with size of group
 - points per square increase with secondary explosions
+- available colors bar
 
 These features are NOT implemented:
 
 - indication of where the second square of a pair can be placed in the form of a +.
 - sound
 - colors beyond green, purple and orange
-- available colors bar
 - available color addition / removal + countdowns
 - points are visible in squares when they are earned
 - points per square increase as game progresses
