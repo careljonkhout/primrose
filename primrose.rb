@@ -6,6 +6,10 @@ class Square
     @content = :empty
   end
 
+  def empty?
+    content == :empty || content == :allowed
+  end
+
   def surrounding_squares
     if block_given?
       [u, d, l, r].each do |adjacent|
@@ -14,6 +18,10 @@ class Square
     else # if not block_given?
       [u, d, l, r].reject { |s| !s }
     end
+  end
+
+  def set_content_if content, content_if
+    @content = content if @content == content_if
   end
 
   def to_s; "[#{row}, #{column}] " end
@@ -31,11 +39,11 @@ class Primrose
     @color_history = []
     update_colors
     f = @field = []
-
+    @field_array = []
     7.times do |i|
       row = f[i] = Array.new
       7.times do |j|
-        row[j] = Square.new(i,j)
+         @field_array << row[j] = Square.new(i,j)
       end
     end
     
@@ -53,11 +61,11 @@ class Primrose
   end
 
   def is_a_special_case?
-    (0..6).all? { |i| ( @field[@previous[1]][i] != :empty ) and ( @field[i][@previous[0]] != :empty ) }
+    (0..6).all? { |i| ( not @field[@previous[1]][i].empty? ) and ( not @field[i][@previous[0]].empty? ) }
   end
 
   def move x, y
-    if @field[y][x].content == :empty &&
+    if @field[y][x].empty? &&
         ( @next_next || @previous[0] == x || @previous[1] == y || is_a_special_case? )
       @move_counter += 1
       push_field
@@ -69,9 +77,19 @@ class Primrose
       clicked_on.surrounding_squares.push(clicked_on).each do |square|
         evaluate_square square
       end
+      @second_phase_to_be_copied_onto_field = ( @borders != [] )
+#      if @next_next
+#        (0..6).each { |i| 
+#          s = @field[@previous[1]][i];
+#          s.content = :allowed if s.content == :empty
+#          s = @field[i][@previous[0]];
+#          s.content = :allowed if s.content == :empty
+#        }
+#      else
+#        @field_array.each { |s| s.set_content_if :empty, :allowed }
+#      end
       update_colors
       manage_color_collection
-      @second_phase_to_be_copied_onto_field = ( @borders != [] )
       return true
     else
       return false
@@ -84,9 +102,18 @@ class Primrose
   end
   
   def manage_color_collection
-    if @move_counter == 96
-      @color_collection << :red
-    end  
+    case @move_counter
+      when  96 then @color_collection << :red
+      when 144 then @color_collection << :dark_green # 144 =  96 + 48
+      when 168 then @color_collection << :pink       # 168 = 144 + 24
+      when 180 then @color_collection << :gray       # 180 = 168 + 12
+      when 186 then @color_collection[0] = nil
+      when 194 then @color_collection[1] = nil
+      when 200 then @color_collection[2] = nil
+      when 206 then @color_collection[3] = nil
+      when 212 then @color_collection[4] = nil
+      when 218 then @color_collection[5] = nil
+    end
   end
 
   def push_field
@@ -166,10 +193,9 @@ class Primrose
         @next, @next_next = @color_collection.random, @color_collection.random
   #      @next, @next_next = @colors[@i], @colors[@i]; @i += 1; @i %= 3
       end
-      @color_history << {:next => @next, :next_next => @next_next}
+      @color_history << [@next, @next_next]
     else
-      @next = @color_history[@move_counter][:next]
-      @next_next = @color_history[@move_counter][:next_next]
+      @next, @next_next = @color_history[@move_counter]
     end
   end
 
@@ -177,7 +203,8 @@ end
 
 class Array
   def random
-    self[rand length]
+    compact = self.compact
+    compact[rand compact.length]
   end
 end
 
